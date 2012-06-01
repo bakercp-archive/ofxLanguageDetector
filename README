@@ -4,5 +4,5 @@ It wraps this library http://code.google.com/p/chromium-compact-language-detecto
 
 See the example.
 
-Note that the binaries and headers linked in the Project.scconfig.
+Note that the binaries and headers linked in the Project.xcconfig.
 

@@ -1,0 +1,8 @@
+This little addon is based on Google's own language detector in chrome.
+
+It wraps this library http://code.google.com/p/chromium-compact-language-detector/
+
+See the example.
+
+Note that the binaries and headers linked in the Project.scconfig.
+

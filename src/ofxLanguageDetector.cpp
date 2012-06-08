@@ -8,42 +8,71 @@
 
 #include "ofxLanguageDetector.h"
 
+//--------------------------------------------------------------
+ofxLanguageDetector::Results::Results() {
+    languageName        = "";
+    lang                = ENGLISH;
+    isReliable          = false;
+    textBytes           = -1;
 
+    for(int i = 0; i < 3; i++) {
+        languages[i]        = ENGLISH;
+        languageNames[i]    = LanguageName(languages[i]);
+        normalizedScores[i] = -1;
+        percents[i]         = -1;
+    }
+};
+
+//--------------------------------------------------------------
+ofxLanguageDetector::Settings::Settings() {
+    bool        isPlainText             = true;
+    bool        allowExtendedLanguages  = true;
+    bool        pickSummaryLanguage     = false;
+    bool        removeWeakMatches       = false;
+    Language    plusOne                 = UNKNOWN_LANGUAGE;
+    const char* tldHint                 = NULL;
+    int         encodingHint            = UNKNOWN_ENCODING;
+    Language    languageHint            = UNKNOWN_LANGUAGE;
+}
+
+//--------------------------------------------------------------
+string ofxLanguageDetector::detect(const string& buffer, const Settings& settings, Results& results) {
+    
+    results.lang = CompactLangDet::DetectLanguage(0,
+                                            buffer.c_str(),
+                                            buffer.length(),
+                                          settings.isPlainText,
+                                          settings.allowExtendedLanguages,
+                                          settings.pickSummaryLanguage,
+                                          settings.removeWeakMatches,
+                                          settings.tldHint,
+                                          settings.encodingHint,
+                                          settings.languageHint,
+                                           results.languages,
+                                           results.percents,
+                                           results.normalizedScores,
+                                          &results.textBytes,
+                                          &results.isReliable);
+    
+    results.languageNames[0] = LanguageName(results.languages[0]);
+    results.languageNames[1] = LanguageName(results.languages[1]);
+    results.languageNames[2] = LanguageName(results.languages[2]);
+    
+    results.languageName     = LanguageName(results.lang);
+    
+    return results.languageName;
+}
+
+//--------------------------------------------------------------
 string ofxLanguageDetector::detect(const string& input) {
+    Settings settings = Settings();
+    Results  results  = Results();
     
-    bool is_plain_text = true;
-    bool do_allow_extended_languages = true;
-    bool do_pick_summary_language = false;
-    bool do_remove_weak_matches = false;
-    bool is_reliable;
-    Language plus_one = UNKNOWN_LANGUAGE;
-    const char* tld_hint = NULL;
-    int encoding_hint = UNKNOWN_ENCODING;
-    Language language_hint = UNKNOWN_LANGUAGE;
+    string lang = detect(input,settings,results);
     
-    double normalized_score3[3];
-    Language language3[3];
-    int percent3[3];
-    int text_bytes;
-    
-    Language lang;
-    lang = CompactLangDet::DetectLanguage(0,
-                                          input.c_str(), input.length(),
-                                          is_plain_text,
-                                          do_allow_extended_languages,
-                                          do_pick_summary_language,
-                                          do_remove_weak_matches,
-                                          tld_hint,
-                                          encoding_hint,
-                                          language_hint,
-                                          language3,
-                                          percent3,
-                                          normalized_score3,
-                                          &text_bytes,
-                                          &is_reliable);
-    if(!is_reliable) {
-        ofLog(OF_LOG_WARNING,"ofxLanguageDetector::detect: result not reliable.");
+    if(!results.isReliable) {
+        ofLog(OF_LOG_WARNING,"ofxLanguageDetector::detect results not reliable.");
     }
     
-    return LanguageName(lang);
+    return lang;
 }
